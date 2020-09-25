@@ -54,8 +54,9 @@ def convert_doc_to_png(bucket_name, object_name):
 def  lambda_handler(event,context):
     # check the opt directories directories = os.popen("find /opt/* -type d -maxdepth 4").read().split("\n")
     # check LD_LIBRARY_PATh os.popen("echo $LD_LIBRARY_PATH").read()
-    bucket_name = "tonouma-266014969233-docs"
-    object_name = "unum_test_document.pdf"
+    print(event)
+    bucket_name = event['bucket_name']
+    object_name = event['object_name']
     print("Bucket Name: %s", bucket_name)
     print("Object Name %s", object_name)
     output = convert_doc_to_png(bucket_name=bucket_name, object_name=object_name)

@@ -18,8 +18,6 @@ def callTextract(bucket_name, object_name, detectText, detectTables ):
         features  = []
         if(detectTables):
             features.append("TABLES")
-        if(detectForms):
-            features.append("FORMS")
         response = textract.analyze_document(
             Document={
                 'S3Object': {
@@ -40,8 +38,8 @@ def callTextract(bucket_name, object_name, detectText, detectTables ):
     return 
 def processImage(features, bucket_name, object_name):
 
-    detectTables = "Tables" in features
-    detectText = "Text" in features
+    detectTables = "detectTables" in features
+    detectText = "detectText" in features
 
     response = callTextract(bucket_name, object_name, detectText, detectTables)
 
@@ -49,9 +47,9 @@ def processImage(features, bucket_name, object_name):
 
     opg = OutputGenerator(response, bucketName=bucket_name, objectName=object_name, tables=detectTables)
 
-    #opg.run()
+    opg.run()
 
-    #print("DocumentId: {}".format(object_name))
+    print("DocumentId: {}".format(object_name))
 
 
 
