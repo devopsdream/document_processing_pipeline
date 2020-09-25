@@ -62,6 +62,14 @@ class TextractPipelineCdkStack(core.Stack):
             description="Poppler Lambda Layer"
         
         )
+        #helper layers
+        textract_processor_layer = lambda_.LayerVersion(
+            self,
+            "HelperLayer",
+            code=lambda_.Code.from_asset(path='helpers'),
+            compatible_runtimes=[lambda_.Runtime.PYTHON_3_7],
+            description="Helper Layers"
+        )
         #define functions
         #get message from sqs
         get_messages_from_sqs = _function.PythonFunction(
@@ -94,7 +102,7 @@ class TextractPipelineCdkStack(core.Stack):
             index='calltextract.py',
             handler='lambda_handler',
             runtime=lambda_.Runtime.PYTHON_3_7,
-            layers=[poppler_layer],
+            layers=[textract_processor_layer],
             tracing=lambda_.Tracing.ACTIVE,
             memory_size=1028,
             timeout=core.Duration.seconds(300)
