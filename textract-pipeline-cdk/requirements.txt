@@ -1,3 +1,7 @@
 -e .
 pytest
-cdk-chalice
+aws_cdk.aws_lambda_event_sources
+aws_cdk.aws_lambda_python
+aws_cdk.aws_sqs
+aws_cdk.aws_stepfunctions
+aws_cdk.aws_stepfunctions_tasks
