@@ -77,8 +77,8 @@ def processRequest(request):
 def lambda_handler(event, context):
     print("event: {}".format(event))
     request = {}
-    request["bucketName"] = 'tonouma-266014969233-docs'
-    request["objectName"] = event
+    request["bucketName"] = event["bucket_name"]
+    request["objectName"] = event["file_name"]
     request["features"] = ['detectText', 'detectTables']    
 
     return processRequest(request)

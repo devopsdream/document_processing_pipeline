@@ -5,6 +5,12 @@ import logging
 from io import BytesIO
 import json
 from pathlib import Path
+from urllib.parse import unquote_plus
+
+#set logging
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
 
 s3 = boto3.resource('s3')
 
@@ -23,10 +29,10 @@ def convert_doc_to_png(bucket_name, object_name):
     for page_num, image in enumerate(images):
         # The directory is: <name of the pdf>-num_pages-<number of pages in the pdf>
         directory = object_name.split('.')[0]
-        print("The directory to save the file %s", directory)
+        logger.info("The directory to save the file %s", directory)
         # Then save the image and name it: <name of the pdf>-page<page number>.FMT
         location = directory + "/" + object_name.split('.')[0] + "-page" + str(page_num) + '.' + "png"
-        print("The name of the file %s", location)
+        logger.info("The name of the file %s", location)
         #buffer the bytes into memory
         buffer = BytesIO()
         image.save(buffer, "png".upper())
@@ -44,8 +50,9 @@ def convert_doc_to_png(bucket_name, object_name):
             }
         )
         ##append to array
-        processed_images.append(location)
-        processed_output = {"bucket_name": bucket_name, "files": processed_images}
+        file_name = {"bucket_name": bucket_name, "file_name": location}
+        processed_images.append(file_name)
+        processed_output = {"files": processed_images}
 
     return  processed_output
 
@@ -54,11 +61,11 @@ def convert_doc_to_png(bucket_name, object_name):
 def  lambda_handler(event,context):
     # check the opt directories directories = os.popen("find /opt/* -type d -maxdepth 4").read().split("\n")
     # check LD_LIBRARY_PATh os.popen("echo $LD_LIBRARY_PATH").read()
-    print(event)
+    logger.info(event)
     bucket_name = event['bucket_name']
-    object_name = event['object_name']
-    print("Bucket Name: %s", bucket_name)
-    print("Object Name %s", object_name)
+    object_name = unquote_plus(event['object_name'])
+    logger.info("Bucket Name: %s", bucket_name)
+    logger.info("Object Name %s", object_name)
     output = convert_doc_to_png(bucket_name=bucket_name, object_name=object_name)
 
     return output
