@@ -50,9 +50,9 @@ def convert_doc_to_png(bucket_name, object_name):
             }
         )
         ##append to array
-        file_name = {"bucket_name": bucket_name, "file_name": location}
+        file_name = {"file_name": location}
         processed_images.append(file_name)
-        processed_output = {"files": processed_images}
+        processed_output = processed_images
 
     return  processed_output
 
@@ -62,8 +62,8 @@ def  lambda_handler(event,context):
     # check the opt directories directories = os.popen("find /opt/* -type d -maxdepth 4").read().split("\n")
     # check LD_LIBRARY_PATh os.popen("echo $LD_LIBRARY_PATH").read()
     logger.info(event)
-    bucket_name = event['bucket_name']
-    object_name = unquote_plus(event['object_name'])
+    bucket_name = event["input"]['bucket_name']
+    object_name = unquote_plus(event["input"]['object_name'])
     logger.info("Bucket Name: %s", bucket_name)
     logger.info("Object Name %s", object_name)
     output = convert_doc_to_png(bucket_name=bucket_name, object_name=object_name)

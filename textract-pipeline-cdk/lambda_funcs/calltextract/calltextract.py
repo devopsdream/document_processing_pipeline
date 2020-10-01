@@ -47,9 +47,11 @@ def processImage(features, bucket_name, object_name):
 
     opg = OutputGenerator(response, bucketName=bucket_name, objectName=object_name, tables=detectTables)
 
-    opg.run()
+    output = opg.run()
 
     print("DocumentId: {}".format(object_name))
+
+    return output
 
 
 
@@ -64,21 +66,17 @@ def processRequest(request):
     print("Processing file: {}".format(object_name))
 
     if object_name and  features:
-        processImage(features=features, bucket_name=bucket_name, object_name=object_name)
+        output = processImage(features=features, bucket_name=bucket_name, object_name=object_name)
 
-    output = "features: {}, Object: {}/{} processed.".format(features, bucket_name, object_name)
+    #output = "features: {}, Object: {}/{} processed.".format(features, bucket_name, object_name)
 
-    return {
-        'statusCode': 200,
-        'body': output
-    }
-
+    return output
 
 def lambda_handler(event, context):
-    print("event: {}".format(event))
+    print("event: {}".format(json.dumps(event)))
     request = {}
     request["bucketName"] = event["bucket_name"]
-    request["objectName"] = event["file_name"]
+    request["objectName"] = event["image"]["file_name"]
     request["features"] = ['detectText', 'detectTables']    
 
     return processRequest(request)

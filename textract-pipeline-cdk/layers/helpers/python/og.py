@@ -10,7 +10,7 @@ class OutputGenerator:
         self.objectName = objectName
         self.tables = tables
 
-        self.outputPath = "{}-analysis/{}/".format(objectName, objectName)
+        self.outputPath = "{}-analysis/".format(objectName, objectName)
 
         self.document = Document(self.response)
 
@@ -21,6 +21,8 @@ class OutputGenerator:
         textInReadingOrder = page.getTextInReadingOrder()
         opath = "{}page-{}-text-inreadingorder.txt".format(self.outputPath, p)
         S3Helper.writeToS3(textInReadingOrder, self.bucketName, opath)
+
+        return opath
 
 
     def _outputTable(self, page, p):
@@ -41,6 +43,8 @@ class OutputGenerator:
         opath = "{}page-{}-tables.csv".format(self.outputPath, p)
         S3Helper.writeCSVRaw(csvData, self.bucketName, opath)
 
+        return opath
+
     def run(self):
 
         if(not self.document.pages):
@@ -59,11 +63,13 @@ class OutputGenerator:
             opath = "{}page-{}-response.json".format(self.outputPath, p)
             S3Helper.writeToS3(json.dumps(page.blocks), self.bucketName, opath)
 
-            self._outputText(page, p)
+            text_file = self._outputText(page, p)
 
             docText = docText + page.text + "\n"
 
             if(self.tables):
-                self._outputTable(page, p)
+                csv_file = self._outputTable(page, p)
 
             p = p + 1
+        return {"csv": csv_file, "text_file": text_file}
+        
