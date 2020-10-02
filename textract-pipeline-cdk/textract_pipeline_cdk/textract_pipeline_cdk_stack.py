@@ -60,9 +60,18 @@ class TextractPipelineCdkStack(core.Stack):
 
         )
         #define the queue
+        dl_queue = sqs.Queue(
+            self,
+            "DeadLetterQueue",
+        )
+        dl_letter = sqs.DeadLetterQueue(
+            max_receive_count=3,
+            queue=dl_queue
+        )
         queue = sqs.Queue(
             self, "TextractPipelineCdkQueue",
             visibility_timeout=core.Duration.seconds(300),
+            dead_letter_queue=dl_letter
             
         )
         queue.grant_consume_messages(sqs_lambda_poller_role)
