@@ -58,7 +58,7 @@ def convert_doc_to_png(bucket_name, object_name):
 
 
 
-def  lambda_handler(event,context):
+def  handler(event,context):
     # check the opt directories directories = os.popen("find /opt/* -type d -maxdepth 4").read().split("\n")
     # check LD_LIBRARY_PATh os.popen("echo $LD_LIBRARY_PATH").read()
     logger.info(event)

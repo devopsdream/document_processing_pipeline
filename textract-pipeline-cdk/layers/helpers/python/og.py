@@ -4,29 +4,31 @@ from trp import Document
 import boto3
 
 class OutputGenerator:
-    def __init__(self, response, bucketName, objectName, tables):
+    def __init__(self, response, bucketName, objectName, tables, metadata):
         self.response = response
         self.bucketName = bucketName
         self.objectName = objectName
         self.tables = tables
+        self.metadata = metadata
 
         self.outputPath = "{}-analysis/".format(objectName, objectName)
 
         self.document = Document(self.response)
 
     def _outputText(self, page, p):
+        page_number = self.metadata['page_number']
         text = page.text
-        opath = "{}page-{}-text.txt".format(self.outputPath, p)
+        opath = "{}page-{}-text.txt".format(self.outputPath, page_number)
         S3Helper.writeToS3(text, self.bucketName, opath)
         textInReadingOrder = page.getTextInReadingOrder()
-        opath = "{}page-{}-text-inreadingorder.txt".format(self.outputPath, p)
+        opath = "{}page-{}-text-inreadingorder.txt".format(self.outputPath, page_number)
         S3Helper.writeToS3(textInReadingOrder, self.bucketName, opath)
 
         return opath
 
 
     def _outputTable(self, page, p):
-
+        page_number = self.metadata['page_number']
         csvData = []
         for table in page.tables:
             csvRow = []
@@ -40,7 +42,7 @@ class OutputGenerator:
             csvData.append([])
             csvData.append([])
 
-        opath = "{}page-{}-tables.csv".format(self.outputPath, p)
+        opath = "{}page-{}-tables.csv".format(self.outputPath, page_number)
         S3Helper.writeCSVRaw(csvData, self.bucketName, opath)
 
         return opath
@@ -59,8 +61,7 @@ class OutputGenerator:
 
         p = 1
         for page in self.document.pages:
-
-            opath = "{}page-{}-response.json".format(self.outputPath, p)
+            opath = "{}page-{}-response.json".format(self.outputPath, self.metadata['page_number'])
             S3Helper.writeToS3(json.dumps(page.blocks), self.bucketName, opath)
 
             text_file = self._outputText(page, p)

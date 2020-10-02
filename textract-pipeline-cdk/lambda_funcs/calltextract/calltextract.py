@@ -2,7 +2,19 @@ import json
 import boto3
 from  helper import AwsHelper, S3Helper
 from og import OutputGenerator
+
+s3client = boto3.resource('s3')
+
+def get_page_metadata(bucket_name, object_name):
+    
+    metadata = s3client.Object(
+        bucket_name=bucket_name, 
+        key=object_name
+    ).metadata
+    return metadata
+
 def callTextract(bucket_name, object_name, detectText, detectTables ):
+
 
     textract = AwsHelper().getClient('textract')
     if(not detectTables):
@@ -44,8 +56,12 @@ def processImage(features, bucket_name, object_name):
     response = callTextract(bucket_name, object_name, detectText, detectTables)
 
     print("Generating output for DocumentId: {}".format(object_name))
+    #print(json.dumps(response))
+    #get page metadata
+    metadata = get_page_metadata(bucket_name=bucket_name, object_name=object_name)
 
-    opg = OutputGenerator(response, bucketName=bucket_name, objectName=object_name, tables=detectTables)
+    opg = OutputGenerator(response, bucketName=bucket_name, objectName=object_name, tables=detectTables,
+    metadata=metadata)
 
     output = opg.run()
 
@@ -72,7 +88,7 @@ def processRequest(request):
 
     return output
 
-def lambda_handler(event, context):
+def handler(event, context):
     print("event: {}".format(json.dumps(event)))
     request = {}
     request["bucketName"] = event["bucket_name"]

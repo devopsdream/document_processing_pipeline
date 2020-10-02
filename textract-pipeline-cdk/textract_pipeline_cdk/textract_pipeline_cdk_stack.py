@@ -148,10 +148,15 @@ class TextractPipelineCdkStack(core.Stack):
         polling_rule.add_target(target=targets.LambdaFunction(poll_sqs_queue))
         
         #process pdf
-        pdf2image = _function.PythonFunction(self, "Pdf2Image",
-            entry='lambda_funcs/pdf2image',
-            index='process_images.py',
-            handler='lambda_handler',
+        pdf2image = lambda_.Function(self, "Pdf2Image",
+            code=lambda_.Code.from_asset('lambda_funcs/pdf2image',
+            bundling = {
+                "image": lambda_.Runtime.PYTHON_3_7.bundling_docker_image,
+                "command": [
+                    "bash", "-c", "pip install -r requirements.txt -t /asset-input && cp -au . /asset-output"
+                ]
+            }),
+            handler='process_images.handler',
             runtime=lambda_.Runtime.PYTHON_3_7,
             layers=[poppler_layer],
             tracing=lambda_.Tracing.ACTIVE,
@@ -162,10 +167,9 @@ class TextractPipelineCdkStack(core.Stack):
         )
 
         #call texract
-        callTextract = _function.PythonFunction(self, "CallTextract",
-            entry='lambda_funcs/calltextract',
-            index='calltextract.py',
-            handler='lambda_handler',
+        callTextract = lambda_.Function(self, "CallTextract",
+            code=lambda_.Code.from_asset('lambda_funcs/calltextract'),
+            handler='calltextract.handler',
             runtime=lambda_.Runtime.PYTHON_3_7,
             layers=[textract_processor_layer],
             tracing=lambda_.Tracing.ACTIVE,
