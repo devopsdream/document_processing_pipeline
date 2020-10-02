@@ -20,6 +20,8 @@ venv.bak/
 # CDK Context & Staging files
 .cdk.staging/
 cdk.out/
+#cdk lambda dependecies
+asset-output/
 
 #
 .vscode/
